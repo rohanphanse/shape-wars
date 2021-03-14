@@ -1,5 +1,3 @@
-// sprites.js
-
 // Globals
 const HEIGHT = 500
 const WIDTH = 800

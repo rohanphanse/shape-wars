@@ -1,5 +1,3 @@
-// methods.js
-
 // Convert angle from radians to degrees
 function radToDeg(angle) {
     return angle * 180 / Math.PI
