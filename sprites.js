@@ -448,18 +448,18 @@ class Game {
         this.enemies = []
         this.projectiles = []
         this.circle = null
-        this.wave = 0
 
         // Elements
         this.map = document.getElementById("map")
 
         // State
         this.arrowCanShoot = true
-        this.stop = false
+        this.paused = false
         this.autoShoot = false
 
         // Data
         this.keysDown = []
+        this.wave = 0
 
         // Event listeners
 
@@ -477,7 +477,6 @@ class Game {
                 }
             }
         }]
-        document.addEventListener(...this.keyDownListener)
 
         // Key up
         this.keyUpListener = ["keyup", event => {
@@ -491,20 +490,17 @@ class Game {
                 this.autoShoot = !this.autoShoot
             }
         }]
-        document.addEventListener(...this.keyUpListener)
 
         // Click
         this.clickListener = ["click", () => {
             this.arrowShoot()
             console.log("arrow", this.arrow.direction, this.keysDown)
         }]
-        this.map.addEventListener(...this.clickListener)
 
         // Prevent context menu from opening over map
         this.contextMenuListener = ["contextmenu", event => {
             event.preventDefault()
         }]
-        this.map.addEventListener(...this.contextMenuListener)
 
         // Mouse down
         this.mouseDownListener = ["mousedown", () => {
@@ -513,7 +509,6 @@ class Game {
                 this.arrow.keysDown = this.keysDown
             }
         }]
-        document.addEventListener(...this.mouseDownListener)
 
         // Mouse up
         this.mouseUpListener = ["mouseup", () => {
@@ -523,7 +518,6 @@ class Game {
                 this.arrow.keysDown = this.keysDown
             }
         }]
-        document.addEventListener(...this.mouseUpListener)
     }
 
     start() {
@@ -536,7 +530,11 @@ class Game {
         this.projectiles = []
         this.circle = new Circle()
 
-        const frame = () => {
+        this.wave = 0
+        this.paused = false
+        this.addListeners()
+
+        this.frame = () => {
             // Arrow
             this.updateArrowPosition()
             this.arrow.draw()
@@ -610,17 +608,31 @@ class Game {
             }
 
             // Next frame
-            if (!this.stop) {
-                requestAnimationFrame(frame)
+            if (this.paused) {
+                
+            } else {
+                this.loop = requestAnimationFrame(this.frame)
             }
         }
 
         // First frame
-        requestAnimationFrame(frame)
+        this.loop = requestAnimationFrame(this.frame)
     }
 
     end() {
-        this.stop = true
+        this.paused = true
+        this.removeListeners()
+        cancelAnimationFrame(this.loop)
+    }
+
+    pause() {
+        this.paused = true
+        cancelAnimationFrame(this.loop)
+    }
+
+    unpause() {
+        this.paused = false
+        this.loop = requestAnimationFrame(this.frame)
     }
 
     arrowShoot() {
@@ -687,9 +699,18 @@ class Game {
         enemy.draw()
     }
 
+    addListeners() {
+        document.addEventListener(...this.keyDownListener)
+        document.addEventListener(...this.keyUpListener)
+        this.map.addEventListener(...this.clickListener)
+        this.map.addEventListener(...this.contextMenuListener)
+        document.addEventListener(...this.mouseDownListener)
+        document.addEventListener(...this.mouseUpListener)
+    }
+
     removeListeners() {
         document.removeEventListener(...this.keyDownListener)
-        document.removeEventListener(...this.keyDownListener)
+        document.removeEventListener(...this.keyUpListener)
         this.map.removeEventListener(...this.clickListener)
         this.map.removeEventListener(...this.contextMenuListener)
         document.removeEventListener(...this.mouseDownListener)

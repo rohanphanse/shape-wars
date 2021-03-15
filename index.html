@@ -8,6 +8,7 @@
     
     <link href = "island.svg" rel = "icon" type = "image/svg" />
     <link href = "style.css" rel = "stylesheet" type = "text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
 
     <script src = "methods.js"></script>
     <script src = "sprites.js"></script>
@@ -20,8 +21,12 @@
             <div id = "map"></div>
             <div id = "bar">
                 <div id = "game-buttons">
-                    <div class = "game-button">1</div>
-                    <div class = "game-button">2</div>
+                    <div id = "pause-button" class = "game-button" >
+                        <div id = "pause-icon" class = "fas fa-pause"></div>
+                    </div>
+                    <div id = "new-game-button" class = "game-button" >
+                        <div class = "fas fa-redo"></div>
+                    </div>
                 </div>
                 <div id = "inventory">
 
