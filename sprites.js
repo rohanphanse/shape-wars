@@ -45,12 +45,13 @@ class Arrow {
         this.map = document.getElementById("map")
 
         // Mouse position
-        document.addEventListener("mousemove", event => {
+        this.mouseMoveListener = ["mousemove", event => {
             this.mouse = {
                 x: event.clientX,
                 y: event.clientY
             }
-        })
+        }]
+        document.addEventListener(...this.mouseMoveListener)
 
         this.create()
         this.draw()
@@ -144,6 +145,10 @@ class Arrow {
                 this.arrow.style.opacity = "0"
             }
         }
+    }
+
+    removeListeners() {
+        document.removeEventListener(...this.mouseMoveListener)
     }
 
 }
@@ -459,7 +464,7 @@ class Game {
         // Event listeners
 
         // Key down
-        document.addEventListener("keydown", event => {
+        this.keyDownListener = ["keydown", event => {
             if (event.keyCode in KEY_TO_NAME) {
                 event.preventDefault()
                 // Only add key if not already in list
@@ -471,10 +476,11 @@ class Game {
                     this.arrowShoot()
                 }
             }
-        })
+        }]
+        document.addEventListener(...this.keyDownListener)
 
         // Key up
-        document.addEventListener("keyup", event => {
+        this.keyUpListener = ["keyup", event => {
             if (event.keyCode in KEY_TO_NAME) {
                 const index = this.keysDown.indexOf(KEY_TO_NAME[event.keyCode])
                 if (index > -1) {
@@ -484,36 +490,40 @@ class Game {
             } else if (event.keyCode === 67 && !event.shiftKey && !event.ctrlKey) {
                 this.autoShoot = !this.autoShoot
             }
-        })
+        }]
+        document.addEventListener(...this.keyUpListener)
 
         // Click
-        this.map.addEventListener("click", () => {
+        this.clickListener = ["click", () => {
             this.arrowShoot()
             console.log("arrow", this.arrow.direction, this.keysDown)
-        })
+        }]
+        this.map.addEventListener(...this.clickListener)
 
         // Prevent context menu from opening over map
-        this.map.addEventListener("contextmenu", event => {
+        this.contextMenuListener = ["contextmenu", event => {
             event.preventDefault()
-        })
+        }]
+        this.map.addEventListener(...this.contextMenuListener)
 
         // Mouse down
-        document.addEventListener("mousedown", () => {
+        this.mouseDownListener = ["mousedown", () => {
             if (!this.keysDown.includes("space")) {
                 this.keysDown.push("space")
                 this.arrow.keysDown = this.keysDown
             }
-        })
-
+        }]
+        document.addEventListener(...this.mouseDownListener)
 
         // Mouse up
-        document.addEventListener("mouseup", () => {
+        this.mouseUpListener = ["mouseup", () => {
             const index = this.keysDown.indexOf("space")
             if (index > -1) {
                 this.keysDown.splice(index, 1)
                 this.arrow.keysDown = this.keysDown
             }
-        })
+        }]
+        document.addEventListener(...this.mouseUpListener)
     }
 
     start() {
@@ -610,7 +620,7 @@ class Game {
     }
 
     end() {
-        clearInterval(this.loop)
+        this.stop = true
     }
 
     arrowShoot() {
@@ -675,5 +685,14 @@ class Game {
         }
 
         enemy.draw()
+    }
+
+    removeListeners() {
+        document.removeEventListener(...this.keyDownListener)
+        document.removeEventListener(...this.keyDownListener)
+        this.map.removeEventListener(...this.clickListener)
+        this.map.removeEventListener(...this.contextMenuListener)
+        document.removeEventListener(...this.mouseDownListener)
+        document.removeEventListener(...this.mouseUpListener)
     }
 }
