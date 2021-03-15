@@ -166,6 +166,7 @@ class Projectile {
         this.shouldDelete = false
 
         // Elements
+        this.element = null
         this.map = document.getElementById("map")
 
         this.create()
@@ -221,7 +222,7 @@ class Circle {
         this.image = "/images/circle.svg"
         
         // Elements
-        this.circle = document.getElementById("island")
+        this.circle = null
         this.map = document.getElementById("map")
         
         // Island
@@ -275,6 +276,10 @@ class HealthBar {
             red: [255, 0, 0]
         }
         this.color = this.colors.green
+
+        // Elements
+        this.container = null
+        this.bar = null
 
         this.create()
         this.update(100)
@@ -342,7 +347,7 @@ class Enemy {
         this.size = 40
         this.radius = 50
         this.maxHealth = 100
-        this.health = 100
+        this.health = this.maxHealth
         this.power = 10
 
         // State
