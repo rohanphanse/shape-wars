@@ -1,2 +1,2 @@
-# shape-wars
+# Shape Wars
 hi
