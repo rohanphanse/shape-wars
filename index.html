@@ -12,27 +12,82 @@
 
     <script src = "methods.js"></script>
     <script src = "sprites.js"></script>
+    <script src = "game.js"></script>
     <script src = "main.js"></script>
 </head>
 
 <body>
     <div class = "center">
-        <div class = "row">
+        <div id = "container">
             <div id = "map"></div>
             <div id = "bar">
                 <div id = "game-buttons">
                     <div id = "pause-button" class = "game-button" >
                         <div id = "pause-icon" class = "fas fa-pause"></div>
                     </div>
-                    <div id = "new-game-button" class = "game-button" >
-                        <div class = "fas fa-redo"></div>
+                    <div id = "home-button" class = "game-button">
+                        <div id = "home-icon" class = "fas fa-home"></div>
                     </div>
                 </div>
-                <div id = "inventory">
-
+            </div>
+            <div id = "home">
+                <div id = "title">Shape Wars</div>
+                <div id = "nav-buttons">
+                    <div id = "play-button" class = "nav-button">Play</div>
+                    <div id = "resume-button" class = "nav-button">Resume</div>
+                    <div id = "rules-button" class = "nav-button">Rules</div>
+                </div>
+                <div id = "score"></div>
+                <div id = "high-score"></div>
+            </div>
+            <div id = "rules">
+                <div id = "rules-title">Rules</div>
+                <div id = "panels">
+                    <div class = "panel">
+                        <div class = "panel-content">
+                            <div class = "panel-front">
+                                <div class = "panel-image-container">
+                                    <img src = "/images/arrow.png" id = "panel-arrow-image" />
+                                </div>
+                                <div class = "panel-text">Move and shoot</div>
+                            </div>
+                            <div class = "panel-back">
+                                Health: 100<br>Power: 10<br>Respawn: 4s<br><br>Move: WASD<br>Shoot: Space<br>or Mouse<br>Autoshoot: C
+                            </div>
+                        </div>
+                    </div>
+                    <div class = "panel">
+                        <div class = "panel-content">
+                            <div class = "panel-front">
+                                <div class = "panel-image-container">
+                                    <img src = "/images/circle.svg" id = "panel-circle-image" />
+                                </div>
+                                <div class = "panel-text">Defend the circle</div>
+                            </div>
+                            <div class = "panel-back">
+                                Health: 500<br><br>Pause: P<br>Home: H<br><br>If the circle dies, it's game over!
+                            </div>
+                        </div>
+                    </div>
+                    <div class = "panel">
+                        <div class = "panel-content">
+                            <div class = "panel-front">
+                                <div class = "panel-image-container">
+                                    <img src = "/images/enemy.png" id = "panel-enemy-image" />
+                                </div>
+                                <div class = "panel-text">Destroy enemies</div>
+                            </div>
+                            <div class = "panel-back">
+                                Health: 100<br>Power: 10<br><br>Enemies attack in waves and aim for the nearest target.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
+            <div id = "back-button">
+                <div class = "fas fa-chevron-left"></div>
+            </div>
+            <div id = "veil"></div>
         </div>
     </div>
 </body>

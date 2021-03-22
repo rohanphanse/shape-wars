@@ -37,7 +37,7 @@ function vector_subtract(v1, v2) {
 }
 
 // Multiply a vector by a scalar
-function vector_scalar_multiply(v, s) {
+function vector_scalar_product(v, s) {
    return v.map(n => n * s)
 }
 

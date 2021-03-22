@@ -39,6 +39,9 @@ class Arrow {
         }
         this.keysDown = []
 
+        // State 
+        this.alive = true
+
         // Elements
         this.arrow = null
         this.arrowImage = null
@@ -51,7 +54,6 @@ class Arrow {
                 y: event.clientY
             }
         }]
-        document.addEventListener(...this.mouseMoveListener)
 
         this.create()
         this.draw()
@@ -126,10 +128,12 @@ class Arrow {
     }
 
     draw() {
-        this.updateDirection()
-        this.arrow.style.left = `${WIDTH / 2 + this.position.x}px`
-        this.arrow.style.top = `${HEIGHT / 2 - this.position.y}px`
-        this.arrowImage.style.transform = `translate(-50%, -50%) rotate(${-this.direction}deg)`
+        if (this.alive) {
+            this.updateDirection()
+            this.arrow.style.left = `${WIDTH / 2 + this.position.x}px`
+            this.arrow.style.top = `${HEIGHT / 2 - this.position.y}px`
+            this.arrowImage.style.transform = `translate(-50%, -50%) rotate(${-this.direction}deg)`
+        }
     }
 
     isHit(power) {
@@ -143,14 +147,26 @@ class Arrow {
 
             if (this.health === 0) {
                 this.arrow.style.opacity = "0"
+                this.alive = false
+                this.health = this.maxHealth
+                this.healthBar.update(this.health / this.maxHealth * 100)
+                setTimeout(() => {
+                    this.alive = true
+                    this.arrow.style.opacity = "1"
+                    this.position.x = WIDTH / 2 - this.size
+                    this.position.y = (HEIGHT / 2 - this.size) * [1, -1][Math.floor(randomNumber(0, 2))]     
+                }, 4000)
             }
         }
+    }
+
+    addListeners() {
+        document.addEventListener(...this.mouseMoveListener)
     }
 
     removeListeners() {
         document.removeEventListener(...this.mouseMoveListener)
     }
-
 }
 
 
@@ -186,7 +202,7 @@ class Projectile {
         element.src = this.image
         element.draggable = false
         this.map.append(element)
-        
+
         this.element = document.getElementById(`projectile-${id}`)
         this.element.style.transform = `translate(-50%, -50%) rotate(${-this.direction}deg)`
         this.element.style.width = `${this.size}px`
@@ -222,7 +238,7 @@ class Circle {
             y: 0
         }
 
-        this.maxHealth = 1000
+        this.maxHealth = 500
         this.health = this.maxHealth
         this.image = "/images/circle.svg"
         
@@ -230,12 +246,19 @@ class Circle {
         this.circle = null
         this.map = document.getElementById("map")
         
-        // Island
+        this.create()
+        
+        this.circle.style.left = `${WIDTH / 2 + this.position.x}px`
+        this.circle.style.top = `${HEIGHT / 2 - this.position.y}px`
+    }
+
+    create() {
+        // Circle
         const circle = document.createElement("div")
         circle.className = "sprite"
         circle.id = "circle"
 
-        // Ship image
+        // Circle image
         const circleImage = document.createElement("img")
         circleImage.id = "circle-image"
         circleImage.className = "sprite-image"
@@ -248,9 +271,6 @@ class Circle {
         this.circleImage = document.getElementById("circle-image")
         
         this.healthBar = new HealthBar(this.circle)
-        
-        this.circle.style.left = `${WIDTH / 2 + this.position.x}px`
-        this.circle.style.top = `${HEIGHT / 2 - this.position.y}px`
     }
 
     isHit(power) {
@@ -316,7 +336,7 @@ class HealthBar {
             // Subtract yellow from green vector
             const difference = vector_subtract(this.colors.yellow, this.colors.green)
             // Add green vector to scalar product of difference and scale
-            this.color = vector_add(this.colors.green, vector_scalar_multiply(difference, scale))
+            this.color = vector_add(this.colors.green, vector_scalar_product(difference, scale))
         } else if (percent > 10 && percent <= 50) {
             // Initial: 10 < n <= 50
             // Scaled:  1  > n >= 0
@@ -324,7 +344,7 @@ class HealthBar {
             // Subtract yellow from red vector
             const difference = vector_subtract(this.colors.red, this.colors.yellow)
             // Add yellow vector to scalar product of difference and scale
-            this.color = vector_add(this.colors.yellow, vector_scalar_multiply(difference, scale))
+            this.color = vector_add(this.colors.yellow, vector_scalar_product(difference, scale))
         } else if (percent >= 0 && percent <= 10) {
             this.color = this.colors.red
         }
@@ -348,7 +368,7 @@ class Enemy {
         this.speed = 1
         this.edgeOffset = 50
         this.image = "/images/enemy.png"
-        this.shootInterval = 2000
+        this.shootInterval = 2000 + Math.round(randomNumber(-500, 500))
         this.size = 40
         this.radius = 50
         this.maxHealth = 100
@@ -440,280 +460,3 @@ class Enemy {
     }
 }
 
-
-class Game {
-    constructor () {
-        // Sprites
-        this.arrow = null
-        this.enemies = []
-        this.projectiles = []
-        this.circle = null
-
-        // Elements
-        this.map = document.getElementById("map")
-
-        // State
-        this.arrowCanShoot = true
-        this.paused = false
-        this.autoShoot = false
-
-        // Data
-        this.keysDown = []
-        this.wave = 0
-
-        // Event listeners
-
-        // Key down
-        this.keyDownListener = ["keydown", event => {
-            if (event.keyCode in KEY_TO_NAME) {
-                event.preventDefault()
-                // Only add key if not already in list
-                if (!this.keysDown.includes(KEY_TO_NAME[event.keyCode])) {
-                    this.keysDown.push(KEY_TO_NAME[event.keyCode])
-                    this.arrow.keysDown = this.keysDown
-                }
-                if (KEY_TO_NAME[event.keyCode] === "space") {
-                    this.arrowShoot()
-                }
-            }
-        }]
-
-        // Key up
-        this.keyUpListener = ["keyup", event => {
-            if (event.keyCode in KEY_TO_NAME) {
-                const index = this.keysDown.indexOf(KEY_TO_NAME[event.keyCode])
-                if (index > -1) {
-                    this.keysDown.splice(index, 1)
-                    this.arrow.keysDown = this.keysDown
-                }
-            } else if (event.keyCode === 67 && !event.shiftKey && !event.ctrlKey) {
-                this.autoShoot = !this.autoShoot
-            }
-        }]
-
-        // Click
-        this.clickListener = ["click", () => {
-            this.arrowShoot()
-            console.log("arrow", this.arrow.direction, this.keysDown)
-        }]
-
-        // Prevent context menu from opening over map
-        this.contextMenuListener = ["contextmenu", event => {
-            event.preventDefault()
-        }]
-
-        // Mouse down
-        this.mouseDownListener = ["mousedown", () => {
-            if (!this.keysDown.includes("space")) {
-                this.keysDown.push("space")
-                this.arrow.keysDown = this.keysDown
-            }
-        }]
-
-        // Mouse up
-        this.mouseUpListener = ["mouseup", () => {
-            const index = this.keysDown.indexOf("space")
-            if (index > -1) {
-                this.keysDown.splice(index, 1)
-                this.arrow.keysDown = this.keysDown
-            }
-        }]
-    }
-
-    start() {
-        // Clear map
-        this.map.textContent = ""
-        
-        // Reset sprites
-        this.arrow = new Arrow()
-        this.enemies = []
-        this.projectiles = []
-        this.circle = new Circle()
-
-        this.wave = 0
-        this.paused = false
-        this.addListeners()
-
-        this.frame = () => {
-            // Arrow
-            this.updateArrowPosition()
-            this.arrow.draw()
-
-            if ((this.keysDown.includes("space") || this.autoShoot) && this.arrowCanShoot) {
-                this.arrowShoot()
-            }
-
-            // Delete projectiles
-            const deletedProjectiles = []
-            for (let i = 0; i < this.projectiles.length; i++) {
-                if (this.projectiles[i].shouldDelete) {
-                    deletedProjectiles.push(i)
-                } else {
-                    this.projectiles[i].draw()
-                }
-            }
-            if (deletedProjectiles.length) {
-                deletedProjectiles.sort((a, b) => b - a)
-                for (const index of deletedProjectiles) {
-                    this.projectiles.splice(index, 1)
-                }
-            }
-
-            // Delete enemies
-            const deletedEnemies = []
-            for (let i = 0; i < this.enemies.length; i++) {
-                if (this.enemies[i].shouldDelete) {
-                    deletedEnemies.push(i)
-                }
-            }
-            if (deletedEnemies.length) {
-                deletedEnemies.sort((a, b) => b - a)
-                for (const index of deletedEnemies) {
-                    this.enemies.splice(index, 1)
-                }
-            }
-
-            // Projectiles hit things
-            for (let i = 0; i < this.projectiles.length; i++) {
-                if (distance(this.projectiles[i].position, this.circle.position) < 50 && this.projectiles[i].shotBy === "enemy") {
-                    this.circle.isHit(this.projectiles[i].power)
-                    this.projectiles[i].shouldDelete = true
-                    this.projectiles[i].element.remove()
-                }
-                if (distance(this.projectiles[i].position, this.arrow.position) < this.arrow.size && this.projectiles[i].shotBy === "enemy") {
-                    this.arrow.isHit(this.projectiles[i].power)
-                    this.projectiles[i].shouldDelete = true
-                    this.projectiles[i].element.remove()
-                }
-
-                for (let j = 0; j < this.enemies.length; j++) {
-                    if (distance(this.projectiles[i].position, this.enemies[j].position) < this.enemies[j].size && this.projectiles[i].shotBy === "arrow") {
-                        this.enemies[j].isHit(this.projectiles[i].power)
-                        this.projectiles[i].shouldDelete = true
-                        this.projectiles[i].element.remove()
-                    }
-                }
-            }
-
-            // Enemies
-            for (let i = 0; i < this.enemies.length; i++) {
-                this.drawEnemy(this.enemies[i])
-            }
-
-            if (this.enemies.length === 0) {
-                this.wave++
-                for (let w = 0; w < this.wave; w++) {
-                    this.enemies.push(new Enemy())
-                }
-            }
-
-            // Next frame
-            if (this.paused) {
-                
-            } else {
-                this.loop = requestAnimationFrame(this.frame)
-            }
-        }
-
-        // First frame
-        this.loop = requestAnimationFrame(this.frame)
-    }
-
-    end() {
-        this.paused = true
-        this.removeListeners()
-        cancelAnimationFrame(this.loop)
-    }
-
-    pause() {
-        this.paused = true
-        cancelAnimationFrame(this.loop)
-    }
-
-    unpause() {
-        this.paused = false
-        this.loop = requestAnimationFrame(this.frame)
-    }
-
-    arrowShoot() {
-        if (this.arrowCanShoot) {
-            this.arrowCanShoot = false
-            
-            setTimeout(() => {
-                this.arrowCanShoot = true
-            }, this.arrow.shootInterval)
-
-            this.projectiles.push(new Projectile({
-                position: {
-                    x: this.arrow.position.x,
-                    y: this.arrow.position.y
-                },
-                direction: this.arrow.direction,
-                power: this.arrow.power,
-                shotBy: "arrow"
-            }))
-        }
-    }
-
-    updateArrowPosition() {
-        const pos = this.arrow.updatePosition()
-        let can_update = true
-
-        if (can_update) {
-            this.arrow.position = pos
-        }
-    }
-
-    drawEnemy(enemy) {
-        if (enemy.canMove) {
-            if (distance(enemy.position, this.circle.position) < HEIGHT / 2 + 200) {
-                enemy.canMove = false
-                enemy.canShoot = true
-            }
-            enemy.updatePosition()
-        } else {
-            // Determine enemy target - circle or arrow
-            enemy.target = distance(enemy.position, this.circle.position) < distance(enemy.position, this.arrow.position) ? this.circle : this.arrow
-            
-            enemy.updateDirection()
-
-            // Shoot
-            if (enemy.canShoot) {
-                enemy.canShoot = false
-                setTimeout(() => {
-                    enemy.canShoot = true
-                }, enemy.shootInterval)
-
-                this.projectiles.push(new Projectile({
-                    position: {
-                        x: enemy.position.x,
-                        y: enemy.position.y
-                    },
-                    direction: enemy.direction,
-                    power: enemy.power,
-                    shotBy: "enemy"
-                }))
-            }
-        }
-
-        enemy.draw()
-    }
-
-    addListeners() {
-        document.addEventListener(...this.keyDownListener)
-        document.addEventListener(...this.keyUpListener)
-        this.map.addEventListener(...this.clickListener)
-        this.map.addEventListener(...this.contextMenuListener)
-        document.addEventListener(...this.mouseDownListener)
-        document.addEventListener(...this.mouseUpListener)
-    }
-
-    removeListeners() {
-        document.removeEventListener(...this.keyDownListener)
-        document.removeEventListener(...this.keyUpListener)
-        this.map.removeEventListener(...this.clickListener)
-        this.map.removeEventListener(...this.contextMenuListener)
-        document.removeEventListener(...this.mouseDownListener)
-        document.removeEventListener(...this.mouseUpListener)
-    }
-}
