@@ -188,7 +188,7 @@ class Projectile {
 
         this.speed = params.speed || 7
         this.edgeOffset = 10
-        this.image = params.image || "/images/ball.svg"
+        this.image = params.image || "images/ball.svg"
         this.size = 10
         this.power = params.power || 10
         this.shotBy = params.shotBy
@@ -254,7 +254,7 @@ class Circle {
 
         this.maxHealth = 500
         this.health = this.maxHealth
-        this.image = "/images/circle.svg"
+        this.image = "images/circle.svg"
         
         // Elements
         this.circle = null
@@ -385,7 +385,7 @@ class Enemy {
 
         this.speed = 1
         this.edgeOffset = 50
-        this.image = "/images/enemy.png"
+        this.image = "images/enemy.png"
         this.shootInterval = 2000 + Math.round(randomNumber(-500, 500))
         this.size = 40
         this.radius = 50
